@@ -2,15 +2,18 @@ package sequenceextractor;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Set;
 
 import astextractor.ASTExtractor;
+import outputhelpers.FlattenedSequencePrinter;
+import outputhelpers.SequencePrinter;
+import outputhelpers.SnippetPrinter;
+import outputhelpers.TreePrinter;
 import parsehelpers.Block;
 import parsehelpers.LookUpTable;
 import parsehelpers.Snippet;
 import parsehelpers.Statement;
+import parsehelpers.StatementTypes;
 import xmlhelpers.XMLDocument;
 import xmlhelpers.XMLNode;
 import xmlhelpers.XMLNodeList;
@@ -87,14 +90,23 @@ public class SequenceExtractor {
 					output.add("void");
 				}
 				// Append also the type of the calling object in this case
-				String methodType = lookUpTable
-						.getTypeOfVariable(node.getChildNodeByName("SimpleName").getTextContent());
-				if (methodType != null && methodType != "___" && output.size() > 1) {
-					if (!(methodType.equals(output.get(1)) || methodType.equals("byte") || methodType.equals("short")
-							|| methodType.equals("int") || methodType.equals("long") || methodType.equals("float")
-							|| methodType.equals("double") || methodType.equals("char") || methodType.equals("String")
-							|| methodType.equals("boolean")))
-						output.add(methodType);
+				XMLNodeList methodTypeAndName = node.getChildNodesByName("SimpleName");
+				if (methodTypeAndName.size() > 0) {
+					String methodType = lookUpTable.getTypeOfVariable(methodTypeAndName.get(0).getTextContent());
+					if (methodType != null && methodType != "___" && output.size() > 1) {
+						if (!(methodType.equals(output.get(1)) || methodType.equals("byte")
+								|| methodType.equals("short") || methodType.equals("int") || methodType.equals("long")
+								|| methodType.equals("float") || methodType.equals("double")
+								|| methodType.equals("char") || methodType.equals("String")
+								|| methodType.equals("boolean")))
+							output.add(methodType);
+					}
+				}
+				if (methodTypeAndName.size() > 1) {
+					String methodName = methodTypeAndName.get(1).getTextContent();
+					if (output.size() > 2) {
+						output.set(2, output.get(2) + "." + methodName);
+					}
 				}
 			} else if (node.hasName("SuperMethodInvocation")) {
 				output.add("FC");
@@ -134,30 +146,9 @@ public class SequenceExtractor {
 		return output;
 	}
 
-	/**
-	 * Processes a method and populates the snippet.
-	 * 
-	 * @param method the method node to be processed.
-	 * @param lookUpTable the look up table for variables.
-	 * @param snippet the snippet where statements are added.
-	 */
-	private static void processMethod(XMLNode method, LookUpTable lookUpTable, Snippet snippet) {
-		lookUpTable.enterMethod();
-
-		ArrayList<XMLNode> parameters = method.getChildNodesByName("SingleVariableDeclaration");
-		for (XMLNode parameter : parameters) {
-			String parameterName = parameter.getChildNodeByName("SimpleName").getTextContent();
-			String parameterType = getType(parameter);
-			lookUpTable.addMethodVariable(parameterName, parameterType);
-		}
-
-		XMLNode block = method.getChildNodeByName("Block");
-		Set<String> statementTypes = new HashSet<String>(
-				Arrays.asList("VariableDeclarationStatement", "ExpressionStatement", "ReturnStatement"));
+	private static void processBlock(XMLNode block, LookUpTable lookUpTable, Snippet snippet, boolean keepBranches) {
 		if (block != null) {
-			ArrayList<XMLNode> statements = block.getChildNodesRecursivelyByName(statementTypes);
-			if (statements.size() > 0)
-				snippet.addBlock();
+			ArrayList<XMLNode> statements = block.getChildNodesRecursivelyByName(StatementTypes.allStatementTypes);
 			for (XMLNode statement : statements) {
 				if (statement.hasName("VariableDeclarationStatement")) {
 					String variableType = getType(statement);
@@ -169,11 +160,121 @@ public class SequenceExtractor {
 					}
 					if (vardecl.hasMoreThanOneChildren())
 						snippet.addStatement(iterateLowLevelCode(vardecl, lookUpTable));
+				} else if (statement.hasName(StatementTypes.branchStatementTypes)) {
+					ArrayList<XMLNode> branchstatements = statement.getChildNodesByName("Block");
+
+					// Check the type of the branch
+					if (statement.hasName(StatementTypes.loopStatementTypes) && branchstatements.size() > 0) {
+						snippet.levelInner();
+						snippet.startBranchBlock("LOOP");
+						processBlock(branchstatements.get(0), lookUpTable, snippet, keepBranches);
+						if (keepBranches)
+							snippet.elseBranchBlock("LOOP");
+						snippet.endBranchBlock("LOOP");
+						snippet.levelOuter();
+					} else if (statement.hasName("IfStatement") && branchstatements.size() > 0) {
+						snippet.levelInner();
+						snippet.startBranchBlock("CONDITION");
+						processBlock(branchstatements.get(0), lookUpTable, snippet, keepBranches);
+						if (keepBranches) {
+							boolean hasElse = false;
+							for (int i = 1; i < branchstatements.size(); i++) {
+								if (branchstatements.get(i).getChildNodeByName("InfixExpression") != null)
+									snippet.elseifBranchBlock("CONDITION");
+								else {
+									hasElse = true;
+									snippet.elseBranchBlock("CONDITION");
+								}
+								processBlock(branchstatements.get(i), lookUpTable, snippet, keepBranches);
+							}
+							if (!hasElse)
+								snippet.elseBranchBlock("CONDITION");
+						}
+						snippet.endBranchBlock("CONDITION");
+						snippet.levelOuter();
+					} else if (statement.hasName("SwitchStatement") && branchstatements.size() > 0) {
+						snippet.levelInner();
+						snippet.startBranchBlock("CASE");
+						processBlock(branchstatements.get(0), lookUpTable, snippet, keepBranches);
+						if (keepBranches) {
+							boolean hasDefault = false;
+							for (int i = 1; i < branchstatements.size(); i++) {
+								if (!branchstatements.get(i).getChildNodeByName("SwitchCase")
+										.textContentStartsWith("default")) {
+									snippet.elseifBranchBlock("CASE");
+								} else {
+									hasDefault = true;
+									snippet.elseBranchBlock("CASE");
+								}
+								processBlock(branchstatements.get(i), lookUpTable, snippet, keepBranches);
+							}
+							if (!hasDefault)
+								snippet.elseBranchBlock("CASE");
+						}
+						snippet.endBranchBlock("CASE");
+						snippet.levelOuter();
+					} else if (statement.hasName("TryStatement") && branchstatements.size() > 0) {
+						snippet.levelInner();
+						snippet.startBranchBlock("TRY");
+						processBlock(branchstatements.get(0), lookUpTable, snippet, keepBranches);
+						if (keepBranches) {
+							boolean hasCatch = false;
+							boolean hasFinally = false;
+							for (int i = 1; i < branchstatements.size(); i++) {
+								if (branchstatements.get(i).getChildNodeByName("CatchClause") != null) {
+									hasCatch = true;
+									snippet.elseifBranchBlock("TRY");
+									processBlock(branchstatements.get(i), lookUpTable, snippet, keepBranches);
+								}
+							}
+							if (!hasCatch)
+								snippet.elseifBranchBlock("TRY");
+							for (int i = 1; i < branchstatements.size(); i++) {
+								if (branchstatements.get(i).getChildNodeByName("CatchClause") == null) {
+									hasFinally = true;
+									snippet.elseBranchBlock("TRY");
+									processBlock(branchstatements.get(i), lookUpTable, snippet, keepBranches);
+								}
+							}
+							if (!hasFinally)
+								snippet.elseBranchBlock("TRY");
+						}
+						snippet.endBranchBlock("TRY");
+						snippet.levelOuter();
+					}
 				} else {
 					snippet.addStatement(iterateLowLevelCode(statement, lookUpTable));
 				}
 			}
 		}
+	}
+
+	/**
+	 * Processes a method and populates the snippet.
+	 * 
+	 * @param method the method node to be processed.
+	 * @param lookUpTable the look up table for variables.
+	 * @param snippet the snippet where statements are added.
+	 * @param keepBranches {@code true} if all branches should be kept, or {@code false} for the first branch.
+	 */
+	private static void processMethod(XMLNode method, LookUpTable lookUpTable, Snippet snippet, boolean keepBranches) {
+		lookUpTable.enterMethod();
+
+		ArrayList<XMLNode> parameters = method.getChildNodesByName("SingleVariableDeclaration");
+		for (XMLNode parameter : parameters) {
+			String parameterName = parameter.getChildNodeByName("SimpleName").getTextContent();
+			String parameterType = getType(parameter);
+			lookUpTable.addMethodVariable(parameterName, parameterType);
+		}
+
+		XMLNode block = method.getChildNodeByName("Block");
+		snippet.levelInner();
+		snippet.startMethodBlock();
+		// snippet.addBlock();
+		processBlock(block, lookUpTable, snippet, keepBranches);
+		snippet.endMethodBlock();
+		snippet.levelOuter();
+		// snippet.addBlock();
 	}
 
 	/**
@@ -193,8 +294,10 @@ public class SequenceExtractor {
 				lookUpTable.addClassVariable(variableName, variableType);
 			}
 			if (vardecl.hasMoreThanOneChildren()) {
-				snippet.addBlock();
+				snippet.levelInner();
+				// snippet.addBlock();
 				snippet.addStatement(iterateLowLevelCode(vardecl, lookUpTable));
+				snippet.levelOuter();
 			}
 		}
 	}
@@ -205,9 +308,11 @@ public class SequenceExtractor {
 	 * @param xml an AST in XML format.
 	 * @param keepFunctionCallTypes {@code true} if call types should be kept, or {@code false} otherwise.
 	 * @param keepLiterals {@code true} if literals (primitives) should be kept, or {@code false} otherwise.
+	 * @param keepBranches {@code true} if all branches should be kept, or {@code false} for the first branch.
 	 * @return a snippet as a sequence of statements
 	 */
-	private static Snippet createSequence(String xml, boolean keepFunctionCallTypes, boolean keepLiterals) {
+	private static Snippet createSequence(String xml, boolean keepFunctionCallTypes, boolean keepLiterals,
+			boolean keepBranches) {
 		// Preprocess the XML of the AST
 		xml = "<file>" + xml + "</file>";
 		xml = xml.replaceAll("\n|\r| ", "");
@@ -217,11 +322,13 @@ public class SequenceExtractor {
 			xml = XMLDocument.removeXMLNodes(xml, "BooleanLiteral", "StringLiteral", "NumberLiteral",
 					"CharacterLiteral");
 		XMLDocument ast = new XMLDocument(xml);
+		ASTPreprocessor.preprocessBranches(ast);
 
 		// Initialize the snippet and the look up table
 		Snippet snippet = new Snippet();
 		LookUpTable lookUpTable = new LookUpTable();
 		XMLNodeList nodeList;
+		// snippet.levelInner();
 
 		// Process a class
 		nodeList = ast.getElementsByTagName("TypeDeclaration");
@@ -258,20 +365,26 @@ public class SequenceExtractor {
 			lookUpTable.addClassVariable(methodName, methodType);
 		}
 		for (XMLNode method : nodeList) {
-			processMethod(method, lookUpTable, snippet);
+			processMethod(method, lookUpTable, snippet, keepBranches);
 		}
 
 		// Remove empty or error statements
-		for (Iterator<Block> iterator = snippet.blocks.iterator(); iterator.hasNext();) {
-			Block block = iterator.next();
-			for (Iterator<Statement> siterator = block.iterator(); siterator.hasNext();) {
-				Statement statement = siterator.next();
-				while (statement.size() > (keepFunctionCallTypes ? 3 : 2)) {
-					statement.remove(statement.size() - 1);
-				}
-				if (statement.isEmpty() || statement.contains(null) || statement.contains("null")
-						|| statement.contains("___")) {
-					siterator.remove();
+		for (Iterator<ArrayList<Block>> iterator = snippet.blocks.values().iterator(); iterator.hasNext();) {
+			ArrayList<Block> blocks = iterator.next();
+			for (Iterator<Block> niterator = blocks.iterator(); niterator.hasNext();) {
+				Block block = niterator.next();
+				for (Iterator<Statement> siterator = block.iterator(); siterator.hasNext();) {
+					Statement statement = siterator.next();
+					if (statement.contains("___")) {
+						statement.remove("___");
+					}
+					while (statement.size() > (keepFunctionCallTypes ? 3 : 2)) {
+						statement.remove(statement.size() - 1);
+					}
+					if (statement.isEmpty() || statement.contains(null) || statement.contains("null")
+							|| statement.contains("___")) {
+						siterator.remove();
+					}
 				}
 			}
 		}
@@ -339,8 +452,8 @@ public class SequenceExtractor {
 	 * @param snippet the snippet of which the sequence is extracted.
 	 * @return the snippet as a list of statements.
 	 */
-	public static ArrayList<String> extractSequence(String snippet) {
-		return extractSequence(snippet, false, false);
+	public static String extractSequence(String snippet) {
+		return extractSequence(snippet, false, false, true, false, true);
 	}
 
 	/**
@@ -349,18 +462,25 @@ public class SequenceExtractor {
 	 * @param snippet the snippet of which the sequence is extracted.
 	 * @param keepFunctionCallTypes {@code true} if call types should be kept, or {@code false} otherwise.
 	 * @param keepLiterals {@code true} if literals (primitives) should be kept, or {@code false} otherwise.
+	 * @param keepBranches {@code true} if all branches should be kept, or {@code false} for the first branch.
+	 * @param outputTree {@code true} if the output should be a tree, or {@code false} for output as a sequence.
+	 * @param flattenOutput {@code true} if the output should be flattened, or {@code false} otherwise.
 	 * @return the snippet as a list of statements.
 	 */
-	public static ArrayList<String> extractSequence(String snippet, boolean keepFunctionCallTypes, boolean keepLiterals) {
+	public static String extractSequence(String snippet, boolean keepFunctionCallTypes, boolean keepLiterals,
+			boolean keepBranches, boolean outputTree, boolean flattenOutput) {
 		String ast = getASTofSnippet(snippet);
-		Snippet seq = createSequence(ast, keepFunctionCallTypes, keepLiterals);
-		ArrayList<String> sequence = new ArrayList<String>();
-		for (Block block : seq.blocks) {
-			for (Statement statement : block) {
-				sequence.add(statement.toString());
-			}
+		Snippet seq = createSequence(ast, keepFunctionCallTypes, keepLiterals, keepBranches);
+		SnippetPrinter printer;
+		if (outputTree)
+			printer = new TreePrinter();
+		else {
+			if (!flattenOutput)
+				printer = new SequencePrinter();
+			else
+				printer = new FlattenedSequencePrinter();
 		}
-		return sequence;
+		return printer.snippetToString(seq);
 	}
 
 }

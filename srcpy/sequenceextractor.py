@@ -1,4 +1,3 @@
-import os
 import base64
 import subprocess
 from subprocess import STDOUT, PIPE
@@ -9,15 +8,20 @@ class _SequenceExtractor(object):
 	and opening pipes to the standard input and standard output so that messages can be sent and received.
 	Instead of using this class, it is highly recommended to use the abstracted SequenceExtractor class.
 	"""
-	def __init__(self, path_to_SequenceExtractor_jar, keep_function_call_types=False, keep_literals=False):
+	def __init__(self, path_to_SequenceExtractor_jar, keep_function_call_types=False, keep_literals=False, keep_branches=True, output_tree=False, flatten_output=True):
 		"""
 		Initializes this inner extractor.
 		
 		:param path_to_SequenceExtractorjar: the path to the SequenceExtractor jar.
 		:param keep_function_call_types: boolean denoting whether function call types should be retained.
 		:param keep_literals: boolean denoting whether literals (primitives) should be retained.
+		:param keep_branches: boolean denoting whether all branches should be kept.
+		:param output_tree: boolean denoting whether the output should be a tree or a sequence.
+		:param flatten_output: boolean denoting whether the output should be flattened-.
 		"""
-		self.cmd = ['java', '-cp', path_to_SequenceExtractor_jar, 'sequenceextractor.PythonBinder', 'true' if keep_function_call_types else 'false', 'true' if keep_literals else 'false']
+		self.cmd = ['java', '-cp', path_to_SequenceExtractor_jar, 'sequenceextractor.PythonBinder', 'true' if keep_function_call_types else 'false',
+					'true' if keep_literals else 'false', 'true' if keep_branches else 'false',
+					'true' if output_tree else 'false', 'true' if flatten_output else 'false']
 		self.proc = subprocess.Popen(self.cmd, stdin=PIPE, stdout=PIPE, stderr=STDOUT)
 		self.nummessages = 0
 		line = self.send_message("START_OF_TRANSMISSION")
@@ -76,15 +80,18 @@ class SequenceExtractor(_SequenceExtractor):
 	"""
 	Class used as a python binding to the SequenceExtractor library. It contains functions for parsing java snippets to sequences.
 	"""
-	def __init__(self, path_to_SequenceExtractor_jar, keep_function_call_types=False, keep_literals=False):
+	def __init__(self, path_to_SequenceExtractor_jar, keep_function_call_types=False, keep_literals=False, keep_branches=False, output_tree=False, flatten_output=False):
 		"""
 		Initializes this Sequence Extractor.
 		
 		:param path_to_SequenceExtractor_jar: the path to the SequenceExtractor jar
 		:param keep_function_call_types: boolean denoting whether function call types should be retained.
 		:param keep_literals: boolean denoting whether literals (primitives) should be retained.
+		:param keep_branches: boolean denoting whether all branches should be kept.
+		:param output_tree: boolean denoting whether the output should be a tree or a sequence.
+		:param flatten_output: boolean denoting whether the output should be flattened-.
 		"""
-		super(SequenceExtractor, self).__init__(path_to_SequenceExtractor_jar, keep_function_call_types, keep_literals)
+		super(SequenceExtractor, self).__init__(path_to_SequenceExtractor_jar, keep_function_call_types, keep_literals, keep_branches, output_tree, flatten_output)
 
 	def parse_snippet(self, snippet_contents):
 		"""

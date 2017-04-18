@@ -22,6 +22,9 @@ public class PythonBinder {
 	public static void main(String[] args) {
 		boolean keepFunctionCallTypes = args.length > 0 ? Boolean.parseBoolean(args[0]) : false;
 		boolean keepLiterals = args.length > 1 ? Boolean.parseBoolean(args[1]) : false;
+		boolean keepBranches = args.length > 2 ? Boolean.parseBoolean(args[2]) : false;
+		boolean outputTree = args.length > 3 ? Boolean.parseBoolean(args[3]) : false;
+		boolean flattenOutput = args.length > 4 ? Boolean.parseBoolean(args[4]) : false;
 		Scanner scanner = new Scanner(System.in);
 		while (scanner.hasNextLine()) {
 			// Receive message and decode it
@@ -45,8 +48,8 @@ public class PythonBinder {
 				System.out.flush();
 				break;
 			} else {
-				messageresult = SequenceExtractor.extractSequence(message, keepFunctionCallTypes, keepLiterals)
-						.toString();
+				messageresult = SequenceExtractor.extractSequence(message, keepFunctionCallTypes, keepLiterals,
+						keepBranches, outputTree, flattenOutput).toString();
 				String b64messageresult = DatatypeConverter
 						.printBase64Binary(messageresult.getBytes(Charset.forName("US-ASCII")));
 				System.out.println(b64messageresult);

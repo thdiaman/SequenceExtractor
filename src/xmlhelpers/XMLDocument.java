@@ -2,6 +2,7 @@ package xmlhelpers;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -9,6 +10,12 @@ import java.util.regex.Pattern;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
@@ -83,6 +90,27 @@ public class XMLDocument {
 			}
 		}
 		return xml;
+	}
+
+	/**
+	 * Returns the XML representation of this document.
+	 * 
+	 * @return a string with the XML representation of this document.
+	 */
+	public String toXMLString() {
+		DOMSource source = new DOMSource(document);
+		StringWriter writer = new StringWriter();
+		StreamResult result = new StreamResult(writer);
+		try {
+			Transformer transformer = TransformerFactory.newInstance().newTransformer();
+			transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
+			transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+			transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "3");
+			transformer.transform(source, result);
+		} catch (TransformerException e) {
+			e.printStackTrace();
+		}
+		return writer.toString();
 	}
 
 }

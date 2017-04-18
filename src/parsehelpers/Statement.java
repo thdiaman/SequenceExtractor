@@ -10,6 +10,16 @@ import java.util.ArrayList;
 @SuppressWarnings("serial")
 public class Statement extends ArrayList<String> {
 
+	public Statement() {
+		super();
+	}
+
+	public Statement(String flowType, String specialType) {
+		super();
+		add(flowType);
+		add(specialType);
+	}
+
 	/**
 	 * Returns a string representation of this statement.
 	 * 
@@ -20,6 +30,6 @@ public class Statement extends ArrayList<String> {
 		if (size() > 2)
 			return get(0) + "_" + get(1) + "(" + get(2) + ")";
 		else
-			return size() > 0 ? get(0) + "_" + get(1) : "";
+			return size() > 1 ? get(0) + "_" + get(1) : "";
 	}
 }
