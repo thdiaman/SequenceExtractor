@@ -7,7 +7,7 @@ It can be used as a library either from Java or from Python using the Python bin
 Using as a library
 ------------------
 Import the library in your code. Then, you can parse snippets as follows:
-<pre><code>ArrayList<String> sequence = SequenceExtractor.extractSequence(""
+<pre><code>String sequence = SequenceExtractor.extractSequence(""
 						+ "JFrame frame = new JFrame(\"myframe\");\n"
 						+ "JPanel panel = new JPanel()\n;"
 						+ "Container pane = frame.getContentPane();\n"
@@ -27,9 +27,13 @@ There are three types of commands:
 - assignments (<code>AM</code>)
 - function calls (<code>FC</code>)  
 
-There are also certain options when extracting the snippets provided asparameters of the <code>extractSequence</code> function. These are:
-- keepFunctionCallTypes: denotes whether to output also the objects performing the function calls (instead of only the return types), default is false.
-- keepLiterals denotes if commands with literals (primitive types) should be extracted, or discarded, default is false.
+There are also certain options when extracting the snippets provided as parameters of the <code>extractSequence</code> function. These are:
+- <code>keepFunctionCallTypes</code>: denotes whether to output also the objects performing the function calls (instead of only the return types), default is false.
+- <code>keepLiterals</code>: denotes if commands with literals (primitive types) should be extracted, or discarded, default is false.
+- <code>keepBranches</code>: denotes if all branch paths should be kept, or only the first path of each branch.
+- <code>outputTree</code>: denotes if the output should be a tree, or a sequence.
+- <code>flattenOutput</code>: denotes if the output should be flattened, i.e. all paths to be merged in a single sequence, or different paths should be retained.
+
 
 Using in Python
 ---------------
@@ -37,7 +41,7 @@ SequenceExtractor also has python bindings. Using the python wrapper is simple. 
 has to be imported and the SequenceExtractor object has to be initialized given the path to the jar
 of the library and the options to keep function call types (<code>keep_function_call_types</code>)
 and keep literals (<code>keep_literals</code>):
-<pre><code>sequence_extractor = SequenceExtractor("path/to/SequenceExtractor-0.1.jar", True, False)</code></pre>
+<pre><code>sequence_extractor = SequenceExtractor("path/to/SequenceExtractor-0.2.jar", False, False, True, False, True)</code></pre>
 After that, you can parse snippets as follows:
 <pre><code>sequence = sequence_extractor.parse_snippet(
 			"JFrame frame = new JFrame(\"myframe\");\n" +
