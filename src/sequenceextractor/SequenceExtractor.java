@@ -6,6 +6,7 @@ import java.util.Iterator;
 
 import astextractor.ASTExtractor;
 import outputhelpers.FlattenedSequencePrinter;
+import outputhelpers.FlattenedTreePrinter;
 import outputhelpers.SequencePrinter;
 import outputhelpers.SnippetPrinter;
 import outputhelpers.TreePrinter;
@@ -472,9 +473,12 @@ public class SequenceExtractor {
 		String ast = getASTofSnippet(snippet);
 		Snippet seq = createSequence(ast, keepFunctionCallTypes, keepLiterals, keepBranches);
 		SnippetPrinter printer;
-		if (outputTree)
-			printer = new TreePrinter();
-		else {
+		if (outputTree) {
+			if (!flattenOutput)
+				printer = new TreePrinter();
+			else
+				printer = new FlattenedTreePrinter();
+		} else {
 			if (!flattenOutput)
 				printer = new SequencePrinter();
 			else

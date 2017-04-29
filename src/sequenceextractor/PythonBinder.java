@@ -22,9 +22,9 @@ public class PythonBinder {
 	public static void main(String[] args) {
 		boolean keepFunctionCallTypes = args.length > 0 ? Boolean.parseBoolean(args[0]) : false;
 		boolean keepLiterals = args.length > 1 ? Boolean.parseBoolean(args[1]) : false;
-		boolean keepBranches = args.length > 2 ? Boolean.parseBoolean(args[2]) : false;
+		boolean keepBranches = args.length > 2 ? Boolean.parseBoolean(args[2]) : true;
 		boolean outputTree = args.length > 3 ? Boolean.parseBoolean(args[3]) : false;
-		boolean flattenOutput = args.length > 4 ? Boolean.parseBoolean(args[4]) : false;
+		boolean flattenOutput = args.length > 4 ? Boolean.parseBoolean(args[4]) : true;
 		Scanner scanner = new Scanner(System.in);
 		while (scanner.hasNextLine()) {
 			// Receive message and decode it

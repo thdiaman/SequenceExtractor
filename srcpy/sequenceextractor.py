@@ -80,7 +80,7 @@ class SequenceExtractor(_SequenceExtractor):
 	"""
 	Class used as a python binding to the SequenceExtractor library. It contains functions for parsing java snippets to sequences.
 	"""
-	def __init__(self, path_to_SequenceExtractor_jar, keep_function_call_types=False, keep_literals=False, keep_branches=False, output_tree=False, flatten_output=False):
+	def __init__(self, path_to_SequenceExtractor_jar, keep_function_call_types=False, keep_literals=False, keep_branches=True, output_tree=False, flatten_output=True):
 		"""
 		Initializes this Sequence Extractor.
 		

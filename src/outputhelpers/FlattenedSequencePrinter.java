@@ -14,12 +14,7 @@ public class FlattenedSequencePrinter implements SnippetPrinter {
 			for (Block block : snippet.blocks.get(orderAndLevel)) {
 				if (block.size() > 0) {
 					for (Statement statement : block) {
-						if (statement.toString().equals("START_METHOD"))
-							seq += (seq.charAt(seq.length() - 1) == '[' ? "" : ", ") + "[";
-						else if (statement.toString().equals("END_METHOD"))
-							seq += "]";
-						else if (!(statement.toString().equals("START_METHOD")
-								|| statement.toString().equals("END_METHOD")
+						if (!(statement.toString().equals("START_METHOD") || statement.toString().equals("END_METHOD")
 								|| statement.toString().equals("START_CONDITION")
 								|| statement.toString().equals("START_CASE") || statement.toString().equals("START_TRY")
 								|| statement.toString().equals("START_LOOP")
