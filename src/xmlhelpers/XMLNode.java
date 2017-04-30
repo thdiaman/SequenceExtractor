@@ -168,6 +168,12 @@ public class XMLNode {
 		return nodes;
 	}
 
+	/**
+	 * Returns all deep child nodes that have the given names resursively.
+	 * 
+	 * @param names the names for which the child nodes are found.
+	 * @return a list of nodes with the given names.
+	 */
 	public XMLNodeList getDeepChildNodesRecursivelyByName(String... names) {
 		XMLNodeList nodes = new XMLNodeList();
 		getDeepChildNodesRecursivelyByName(node, Arrays.asList(names), nodes);
@@ -194,6 +200,12 @@ public class XMLNode {
 		return names.contains(node.getNodeName());
 	}
 
+	/**
+	 * Checks if the name of this node is contained in the given strings.
+	 * 
+	 * @param names a set of strings to be checked whether they include the name of this node.
+	 * @return {@code true} if the name of this node is contained in the given strings, or {@code false} otherwise.
+	 */
 	public boolean hasName(String... names) {
 		return Arrays.asList(names).contains(node.getNodeName());
 	}
@@ -225,26 +237,51 @@ public class XMLNode {
 		return new XMLNode(node.getParentNode());
 	}
 
+	/**
+	 * Denotes whether the text content of this node starts with the given text.
+	 * 
+	 * @param text the text to check if it is the start of the contents of this node.
+	 * @return {@code true} if the the text content of this node starts with the given text, or {@code false} otherwise.
+	 */
 	public boolean textContentStartsWith(String text) {
 		return node.getTextContent() != null ? node.getTextContent().startsWith(text) : false;
 	}
 
+	/**
+	 * Replaces the parent node of this node with the given new parent node.
+	 * 
+	 * @param newParentNode the new parent node of this node.
+	 */
 	public void insertNewParentNode(XMLNode newParentNode) {
 		Node oldParentNode = node.getParentNode();
 		newParentNode.node.appendChild(newParentNode.node.getOwnerDocument().importNode(node, true));
 		oldParentNode.replaceChild(node.getOwnerDocument().importNode(newParentNode.node, true), node);
 	}
 
+	/**
+	 * Adds a new child node to this node.
+	 * 
+	 * @param newChildNode the node to be added as a new child node to this node.
+	 */
 	public void addNewChildNode(XMLNode newChildNode) {
 		node.appendChild(node.getOwnerDocument().importNode(newChildNode.node, true));
 	}
 
+	/**
+	 * Adds a list of nodes as child nodes to this node.
+	 * 
+	 * @param newChildNodes the list of nodes to be added as new child nodes to this node.
+	 */
 	public void addNewChildNodes(XMLNodeList newChildNodes) {
 		for (XMLNode newChildNode : newChildNodes) {
 			node.appendChild(node.getOwnerDocument().importNode(newChildNode.node, true));
 		}
 	}
 
+	/**
+	 * Removes the parent node of this node. After calling this function, the parent of the parent node becomes the new
+	 * parent node of this node.
+	 */
 	public void removeParentNode() {
 		XMLNode oldParentNode = getParentNode();
 		XMLNode newParentNode = oldParentNode.getParentNode();
@@ -253,16 +290,32 @@ public class XMLNode {
 			oldParentNode.getParentNode().node.removeChild(oldParentNode.node);
 	}
 
+	/**
+	 * Replaces a child node of this node with another new child node.
+	 * 
+	 * @param newChild the child to replace the current child.
+	 * @param oldChild the child that is replaced.
+	 */
 	public void replaceChild(XMLNode newChild, XMLNode oldChild) {
 		node.replaceChild(node.getOwnerDocument().importNode(newChild.node, true), oldChild.node);
 	}
 
+	/**
+	 * Removes and returns the given child from this node.
+	 * 
+	 * @param child the child node to be removed.
+	 * @return the removed child node.
+	 */
 	public XMLNode removeChild(XMLNode child) {
 		return new XMLNode(node.removeChild(child.node));
 	}
 
+	/**
+	 * Adds a new child node as the first child node of this node.
+	 * 
+	 * @param newChildNode the new child node to be added to the children of this node.
+	 */
 	public void addNewChildNodeInTheBeginning(XMLNode newChildNode) {
-		node.appendChild(node.getOwnerDocument().importNode(newChildNode.node, true));
 		if (node.hasChildNodes())
 			node.insertBefore(node.getOwnerDocument().importNode(newChildNode.node, true), node.getFirstChild());
 		else
