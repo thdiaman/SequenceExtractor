@@ -5,8 +5,20 @@ import parsehelpers.Snippet;
 import parsehelpers.Statement;
 import sequenceextractor.LevelOrderPair;
 
+/**
+ * Class that prints the snippets as trees.
+ * 
+ * @author themis
+ */
 public class TreePrinter implements SnippetPrinter {
 
+	/**
+	 * Receives a snippet and returns a tree representation for the snippet.
+	 * An example of the snippet tree would be [[A, [B, C], [D, E]]].
+	 * 
+	 * @param snippet the snippet to be parsed.
+	 * @return a tree representation for the snippet.
+	 */
 	@Override
 	public String snippetToString(Snippet snippet) {
 		String treeseq = "[";

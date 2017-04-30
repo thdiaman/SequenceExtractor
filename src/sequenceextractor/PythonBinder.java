@@ -17,7 +17,8 @@ public class PythonBinder {
 	 * reading the required task in the form of a message and writing the result as a message in the standard output.
 	 * The base 64 format is used to send the messages.
 	 * 
-	 * @param args receives the booleans denoting if function call types and literals should be kept.
+	 * @param args receives the booleans denoting if function call types, literals and branches should be kept, if
+	 *            the output should be a tree or sequence, and if the output should be flattened.
 	 */
 	public static void main(String[] args) {
 		boolean keepFunctionCallTypes = args.length > 0 ? Boolean.parseBoolean(args[0]) : false;

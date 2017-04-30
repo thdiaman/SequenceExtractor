@@ -5,8 +5,21 @@ import parsehelpers.Snippet;
 import parsehelpers.Statement;
 import sequenceextractor.LevelOrderPair;
 
+/**
+ * Class that prints the snippets as flattened sequences.
+ * 
+ * @author themis
+ */
 public class FlattenedSequencePrinter implements SnippetPrinter {
 
+	/**
+	 * Receives a snippet and returns a flattened sequence representation.
+	 * Given for example the snippet sequence [[A, B, C], [D, E]], where [A, B, C] and [D, E] are sequences of two
+	 * functions, this function would return [A, B, C, D, E].
+	 * 
+	 * @param snippet the snippet to be parsed.
+	 * @return a flattened tree representation for the snippet.
+	 */
 	@Override
 	public String snippetToString(Snippet snippet) {
 		String seq = "[";

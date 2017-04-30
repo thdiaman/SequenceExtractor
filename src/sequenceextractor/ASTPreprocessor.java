@@ -8,8 +8,19 @@ import xmlhelpers.XMLDocument;
 import xmlhelpers.XMLNode;
 import xmlhelpers.XMLNodeList;
 
+/**
+ * The AST preprocessor class that receives an AST and preprocesses it.
+ * 
+ * @author themis
+ */
 public class ASTPreprocessor {
 
+	/**
+	 * Preprocesses the branches of an AST by first adding a block to all branches (e.g. if statements with no braces),
+	 * and then setting all branch paths in the same level (e.g. if, else if and else statements)
+	 * 
+	 * @param ast the AST to be preprocessed in XML format.
+	 */
 	public static void preprocessBranches(XMLDocument ast) {
 		for (XMLNode method : ast.getElementsByTagName("MethodDeclaration")) {
 			addBlockToBranches(method.getChildNodeByName("Block"));
@@ -20,13 +31,15 @@ public class ASTPreprocessor {
 				detectIfElseBranches(ifstatement);
 				detectSwitchCaseBranches(ifstatement);
 				putConditionsInBlocks(ifstatement);
-				// putCatchClausesInBlocks(ifstatement);
 			}
 		}
-//		System.out.println(ast.toXMLString());
-//		System.exit(0);
 	}
 
+	/**
+	 * Adds a block to all branch statement types (e.g. if statements with no braces) of the given method block.
+	 * 
+	 * @param block the block of a method.
+	 */
 	public static void addBlockToBranches(XMLNode block) {
 		ArrayList<XMLNode> statements = block.getChildNodesRecursivelyByName(StatementTypes.branchStatementTypes);
 		for (XMLNode statement : statements) {
@@ -43,6 +56,12 @@ public class ASTPreprocessor {
 		}
 	}
 
+	/**
+	 * Detects if/else if/else statements and puts them all under the same branch block. This function is recursive to
+	 * support nested if statements.
+	 * 
+	 * @param ifstatement an if statement of a method block.
+	 */
 	public static void detectIfElseBranches(XMLNode ifstatement) {
 		ArrayList<XMLNode> statements = ifstatement.getDeepChildNodesRecursivelyByName("IfStatement");
 		Collections.reverse(statements);
@@ -58,6 +77,12 @@ public class ASTPreprocessor {
 		}
 	}
 
+	/**
+	 * Detects switch/case/default statements and puts them all under the same branch block. This function is recursive
+	 * to support nested switch statements.
+	 * 
+	 * @param switchstatement a switch statement of a method block.
+	 */
 	private static void detectSwitchCaseBranches(XMLNode switchstatement) {
 		if (switchstatement.hasName("SwitchStatement")) {
 			for (XMLNode nestedswitchstatement : switchstatement
@@ -99,14 +124,19 @@ public class ASTPreprocessor {
 		}
 	}
 
+	/**
+	 * Puts all infix expressions of conditions in blocks so that they are in the same level as the corresponding branch
+	 * of the condition.
+	 * 
+	 * @param ifstatement an if statement of a method block.
+	 */
 	private static void putConditionsInBlocks(XMLNode ifstatement) {
 		XMLNodeList branchstatements = ifstatement.getChildNodesRecursivelyByName("Block", "InfixExpression");
 		for (int i = 0; i < branchstatements.size() - 1; i++) {
 			XMLNode infixstatement = branchstatements.get(i);
 			XMLNode blockstatement = branchstatements.get(i + 1);
 			if (infixstatement.hasName("InfixExpression") && blockstatement.hasName("Block")) {
-				blockstatement
-						.addNewChildNodeInTheBeginning(infixstatement.getParentNode().removeChild(infixstatement));
+				blockstatement.addNewChildNodeInTheBeginning(infixstatement.getParentNode().removeChild(infixstatement));
 			}
 		}
 	}

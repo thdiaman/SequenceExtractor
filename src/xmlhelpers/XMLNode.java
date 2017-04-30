@@ -144,6 +144,12 @@ public class XMLNode {
 		return nodes;
 	}
 
+	/**
+	 * Returns all child nodes that have the given names resursively.
+	 * 
+	 * @param names the names for which the child nodes are found.
+	 * @return a list of nodes with the given names.
+	 */
 	public XMLNodeList getChildNodesRecursivelyByName(String... names) {
 		XMLNodeList nodes = new XMLNodeList();
 		getChildNodesRecursivelyByName(node, Arrays.asList(names), nodes);

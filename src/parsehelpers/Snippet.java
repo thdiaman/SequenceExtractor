@@ -16,8 +16,16 @@ public class Snippet {
 	 * The blocks that are contained in this snippet.
 	 */
 	public TreeMap<LevelOrderPair, ArrayList<Block>> blocks;
-	int currentLevel;
-	int currentOrder;
+
+	/**
+	 * The current level of the tree node of this snippet.
+	 */
+	private int currentLevel;
+
+	/**
+	 * The current order of the tree node of this snippet.
+	 */
+	private int currentOrder;
 
 	/**
 	 * Initializes this snippet.
@@ -29,7 +37,9 @@ public class Snippet {
 	}
 
 	/**
-	 * Adds a new block to this snippet.
+	 * Adds a new block to this snippet in the given level.
+	 * 
+	 * @param level the level to which the new block is added.
 	 */
 	public void addBlock(int level) {
 		LevelOrderPair levelAndOrder = new LevelOrderPair(currentLevel, currentOrder);
@@ -38,10 +48,9 @@ public class Snippet {
 		blocks.get(levelAndOrder).add(new Block());
 	}
 
-	public void addBlock() {
-		addBlock(currentLevel);
-	}
-
+	/**
+	 * Moves a level in for this snippet.
+	 */
 	public void levelInner() {
 		currentLevel++;
 		currentOrder++;
@@ -49,34 +58,49 @@ public class Snippet {
 			currentOrder = blocks.lastKey().order + 1;
 	}
 
+	/**
+	 * Moves a level out for this snippet.
+	 */
 	public void levelOuter() {
 		currentLevel--;
 		if (blocks.size() > 0)
 			currentOrder = blocks.lastKey().order + 1;
 	}
 
-	public void startMethodBlock() {
-		addStatement(new Statement("START", "METHOD"));
-	}
-
-	public void endMethodBlock() {
-		addStatement(new Statement("END", "METHOD"));
-	}
-
-	public void startBranchBlock(String type) {
+	/**
+	 * Starts a new block.
+	 * 
+	 * @param type the type of the block (METHOD, LOOP, CONDITION, CASE, TRY).
+	 */
+	public void startBlock(String type) {
 		addStatement(new Statement("START", type));
 	}
 
-	public void elseifBranchBlock(String type) {
+	/**
+	 * Adds a path to the last branch block.
+	 * 
+	 * @param type the type of the block (CONDITION, CASE, TRY).
+	 */
+	public void elseifBlock(String type) {
 		addStatement(new Statement("ELSEIF", type));
 	}
 
-	public void elseBranchBlock(String type) {
+	/**
+	 * Adds a final path to the last branch block (e.g. else statement for if branches).
+	 * 
+	 * @param type the type of the block (LOOP, CONDITION, CASE, TRY).
+	 */
+	public void elseBlock(String type) {
 		addStatement(new Statement("ELSE", type));
 	}
 
-	public void endBranchBlock(String type) {
-		addStatement(new Statement("END", type));
+	/**
+	 * Ends the last block.
+	 * 
+	 * @param type the type of the block (METHOD, LOOP, CONDITION, CASE, TRY).
+	 */
+	public void endBlock(String type) {
+		addStatement(new Statement("START", type));
 	}
 
 	/**
@@ -87,7 +111,7 @@ public class Snippet {
 	public void addStatement(Statement statement) {
 		LevelOrderPair blockKey = new LevelOrderPair(currentLevel, currentOrder);
 		if (!blocks.containsKey(blockKey))
-			addBlock();
+			addBlock(currentLevel);
 		blocks.get(new LevelOrderPair(currentLevel, currentOrder))
 				.get(blocks.get(new LevelOrderPair(currentLevel, currentOrder)).size() - 1).add(statement);
 	}

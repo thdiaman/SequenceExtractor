@@ -167,56 +167,56 @@ public class SequenceExtractor {
 					// Check the type of the branch
 					if (statement.hasName(StatementTypes.loopStatementTypes) && branchstatements.size() > 0) {
 						snippet.levelInner();
-						snippet.startBranchBlock("LOOP");
+						snippet.startBlock("LOOP");
 						processBlock(branchstatements.get(0), lookUpTable, snippet, keepBranches);
 						if (keepBranches)
-							snippet.elseBranchBlock("LOOP");
-						snippet.endBranchBlock("LOOP");
+							snippet.elseBlock("LOOP");
+						snippet.endBlock("LOOP");
 						snippet.levelOuter();
 					} else if (statement.hasName("IfStatement") && branchstatements.size() > 0) {
 						snippet.levelInner();
-						snippet.startBranchBlock("CONDITION");
+						snippet.startBlock("CONDITION");
 						processBlock(branchstatements.get(0), lookUpTable, snippet, keepBranches);
 						if (keepBranches) {
 							boolean hasElse = false;
 							for (int i = 1; i < branchstatements.size(); i++) {
 								if (branchstatements.get(i).getChildNodeByName("InfixExpression") != null)
-									snippet.elseifBranchBlock("CONDITION");
+									snippet.elseifBlock("CONDITION");
 								else {
 									hasElse = true;
-									snippet.elseBranchBlock("CONDITION");
+									snippet.elseBlock("CONDITION");
 								}
 								processBlock(branchstatements.get(i), lookUpTable, snippet, keepBranches);
 							}
 							if (!hasElse)
-								snippet.elseBranchBlock("CONDITION");
+								snippet.elseBlock("CONDITION");
 						}
-						snippet.endBranchBlock("CONDITION");
+						snippet.endBlock("CONDITION");
 						snippet.levelOuter();
 					} else if (statement.hasName("SwitchStatement") && branchstatements.size() > 0) {
 						snippet.levelInner();
-						snippet.startBranchBlock("CASE");
+						snippet.startBlock("CASE");
 						processBlock(branchstatements.get(0), lookUpTable, snippet, keepBranches);
 						if (keepBranches) {
 							boolean hasDefault = false;
 							for (int i = 1; i < branchstatements.size(); i++) {
 								if (!branchstatements.get(i).getChildNodeByName("SwitchCase")
 										.textContentStartsWith("default")) {
-									snippet.elseifBranchBlock("CASE");
+									snippet.elseifBlock("CASE");
 								} else {
 									hasDefault = true;
-									snippet.elseBranchBlock("CASE");
+									snippet.elseBlock("CASE");
 								}
 								processBlock(branchstatements.get(i), lookUpTable, snippet, keepBranches);
 							}
 							if (!hasDefault)
-								snippet.elseBranchBlock("CASE");
+								snippet.elseBlock("CASE");
 						}
-						snippet.endBranchBlock("CASE");
+						snippet.endBlock("CASE");
 						snippet.levelOuter();
 					} else if (statement.hasName("TryStatement") && branchstatements.size() > 0) {
 						snippet.levelInner();
-						snippet.startBranchBlock("TRY");
+						snippet.startBlock("TRY");
 						processBlock(branchstatements.get(0), lookUpTable, snippet, keepBranches);
 						if (keepBranches) {
 							boolean hasCatch = false;
@@ -224,23 +224,23 @@ public class SequenceExtractor {
 							for (int i = 1; i < branchstatements.size(); i++) {
 								if (branchstatements.get(i).getChildNodeByName("CatchClause") != null) {
 									hasCatch = true;
-									snippet.elseifBranchBlock("TRY");
+									snippet.elseifBlock("TRY");
 									processBlock(branchstatements.get(i), lookUpTable, snippet, keepBranches);
 								}
 							}
 							if (!hasCatch)
-								snippet.elseifBranchBlock("TRY");
+								snippet.elseifBlock("TRY");
 							for (int i = 1; i < branchstatements.size(); i++) {
 								if (branchstatements.get(i).getChildNodeByName("CatchClause") == null) {
 									hasFinally = true;
-									snippet.elseBranchBlock("TRY");
+									snippet.elseBlock("TRY");
 									processBlock(branchstatements.get(i), lookUpTable, snippet, keepBranches);
 								}
 							}
 							if (!hasFinally)
-								snippet.elseBranchBlock("TRY");
+								snippet.elseBlock("TRY");
 						}
-						snippet.endBranchBlock("TRY");
+						snippet.endBlock("TRY");
 						snippet.levelOuter();
 					}
 				} else {
@@ -270,12 +270,10 @@ public class SequenceExtractor {
 
 		XMLNode block = method.getChildNodeByName("Block");
 		snippet.levelInner();
-		snippet.startMethodBlock();
-		// snippet.addBlock();
+		snippet.startBlock("METHOD");
 		processBlock(block, lookUpTable, snippet, keepBranches);
-		snippet.endMethodBlock();
+		snippet.endBlock("METHOD");
 		snippet.levelOuter();
-		// snippet.addBlock();
 	}
 
 	/**

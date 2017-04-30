@@ -10,14 +10,24 @@ import java.util.ArrayList;
 @SuppressWarnings("serial")
 public class Statement extends ArrayList<String> {
 
+	/**
+	 * Initializes an empty statement.
+	 */
 	public Statement() {
 		super();
 	}
 
-	public Statement(String flowType, String specialType) {
+	/**
+	 * Initializes a special type of statement including the type of flow (e.g. START, END, etc.) and the given block
+	 * type (e.g. METHOD). Example statements include "START, METHOD", "END, METHOD", etc.
+	 * 
+	 * @param flowType the type of the flow.
+	 * @param blockType the type of the block.
+	 */
+	public Statement(String flowType, String blockType) {
 		super();
 		add(flowType);
-		add(specialType);
+		add(blockType);
 	}
 
 	/**
