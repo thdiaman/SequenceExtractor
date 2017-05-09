@@ -15,10 +15,11 @@ public class FlattenedTreePrinter implements SnippetPrinter {
 	 * [[A, B, D], [A, B, E], [A, C, D], [A, C, E]].
 	 * 
 	 * @param snippet the snippet to be parsed.
+	 * @param addUniqueIDs boolean denoting whether statements should have IDs ({@code true}) or not ({@code false}).
 	 * @return a flattened tree representation for the snippet.
 	 */
 	@Override
-	public String snippetToString(Snippet snippet) {
+	public String snippetToString(Snippet snippet, boolean addUniqueIDs) {
 		throw new UnsupportedOperationException("Not implemented yet");
 	}
 

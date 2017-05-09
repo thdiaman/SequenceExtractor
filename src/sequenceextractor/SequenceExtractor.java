@@ -452,7 +452,7 @@ public class SequenceExtractor {
 	 * @return the snippet as a list of statements.
 	 */
 	public static String extractSequence(String snippet) {
-		return extractSequence(snippet, false, false, true, false, true);
+		return extractSequence(snippet, false, false, true, false, true, false);
 	}
 
 	/**
@@ -467,7 +467,7 @@ public class SequenceExtractor {
 	 * @return the snippet as a list of statements.
 	 */
 	public static String extractSequence(String snippet, boolean keepFunctionCallTypes, boolean keepLiterals,
-			boolean keepBranches, boolean outputTree, boolean flattenOutput) {
+			boolean keepBranches, boolean outputTree, boolean flattenOutput, boolean addUniqueIDs) {
 		String ast = getASTofSnippet(snippet);
 		Snippet seq = createSequence(ast, keepFunctionCallTypes, keepLiterals, keepBranches);
 		SnippetPrinter printer;
@@ -482,7 +482,7 @@ public class SequenceExtractor {
 			else
 				printer = new FlattenedSequencePrinter();
 		}
-		return printer.snippetToString(seq);
+		return printer.snippetToString(seq, addUniqueIDs);
 	}
 
 }

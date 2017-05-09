@@ -18,10 +18,12 @@ public class FlattenedSequencePrinter implements SnippetPrinter {
 	 * functions, this function would return [A, B, C, D, E].
 	 * 
 	 * @param snippet the snippet to be parsed.
+	 * @param addUniqueIDs boolean denoting whether statements should have IDs ({@code true}) or not ({@code false}).
 	 * @return a flattened tree representation for the snippet.
 	 */
 	@Override
-	public String snippetToString(Snippet snippet) {
+	public String snippetToString(Snippet snippet, boolean addUniqueIDs) {
+		int id = 0;
 		String seq = "[";
 		for (LevelOrderPair orderAndLevel : snippet.blocks.keySet()) {
 			for (Block block : snippet.blocks.get(orderAndLevel)) {
@@ -39,7 +41,8 @@ public class FlattenedSequencePrinter implements SnippetPrinter {
 								|| statement.toString().equals("END_CONDITION")
 								|| statement.toString().equals("END_CASE") || statement.toString().equals("END_TRY")
 								|| statement.toString().equals("END_LOOP")))
-							seq += (seq.charAt(seq.length() - 1) == '[' ? "" : ", ") + statement.toString();
+							seq += (seq.charAt(seq.length() - 1) == '[' ? "" : ", ") + statement.toString()
+									+ (addUniqueIDs ? "#" + (++id) : "");
 					}
 				}
 			}

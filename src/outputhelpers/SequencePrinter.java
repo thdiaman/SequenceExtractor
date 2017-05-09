@@ -17,10 +17,12 @@ public class SequencePrinter implements SnippetPrinter {
 	 * An example of a sequence would be [[A, B, C], [D, E]], where [A, B, C] and [D, E] are sequences of two functions.
 	 * 
 	 * @param snippet the snippet to be parsed.
+	 * @param addUniqueIDs boolean denoting whether statements should have IDs ({@code true}) or not ({@code false}).
 	 * @return a tree representation for the snippet.
 	 */
 	@Override
-	public String snippetToString(Snippet snippet) {
+	public String snippetToString(Snippet snippet, boolean addUniqueIDs) {
+		int id = 0;
 		String seq = "[";
 		for (LevelOrderPair orderAndLevel : snippet.blocks.keySet()) {
 			for (Block block : snippet.blocks.get(orderAndLevel)) {
@@ -43,7 +45,8 @@ public class SequencePrinter implements SnippetPrinter {
 								|| statement.toString().equals("END_CONDITION")
 								|| statement.toString().equals("END_CASE") || statement.toString().equals("END_TRY")
 								|| statement.toString().equals("END_LOOP")))
-							seq += (seq.charAt(seq.length() - 1) == '[' ? "" : ", ") + statement.toString();
+							seq += (seq.charAt(seq.length() - 1) == '[' ? "" : ", ") + statement.toString()
+									+ (addUniqueIDs ? "#" + (++id) : "");
 					}
 				}
 			}

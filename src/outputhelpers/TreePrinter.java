@@ -17,10 +17,12 @@ public class TreePrinter implements SnippetPrinter {
 	 * An example of the snippet tree would be [[A, [B, C], [D, E]]].
 	 * 
 	 * @param snippet the snippet to be parsed.
+	 * @param addUniqueIDs boolean denoting whether statements should have IDs ({@code true}) or not ({@code false}).
 	 * @return a tree representation for the snippet.
 	 */
 	@Override
-	public String snippetToString(Snippet snippet) {
+	public String snippetToString(Snippet snippet, boolean addUniqueIDs) {
+		int id = 0;
 		String treeseq = "[";
 		for (LevelOrderPair orderAndLevel : snippet.blocks.keySet()) {
 			for (Block block : snippet.blocks.get(orderAndLevel)) {
@@ -49,7 +51,8 @@ public class TreePrinter implements SnippetPrinter {
 						else if (statement.toString().equals("END_TRY"))
 							treeseq += "";
 						else
-							treeseq += (treeseq.charAt(treeseq.length() - 1) == '[' ? "" : ", ") + statement.toString();
+							treeseq += (treeseq.charAt(treeseq.length() - 1) == '[' ? "" : ", ") + statement.toString()
+									+ (addUniqueIDs ? "#" + (++id) : "");
 					}
 				}
 			}

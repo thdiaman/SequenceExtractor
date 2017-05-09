@@ -33,6 +33,7 @@ There are also certain options when extracting the snippets provided as paramete
 - <code>keepBranches</code>: denotes if all branch paths should be kept, or only the first path of each branch.
 - <code>outputTree</code>: denotes if the output should be a tree, or a sequence.
 - <code>flattenOutput</code>: denotes if the output should be flattened, i.e. all paths to be merged in a single sequence, or different paths should be retained.
+- <code>addUniqueIDs</code>: denotes if statements should have unique IDs, default is false.
 
 
 Using in Python

@@ -8,7 +8,7 @@ class _SequenceExtractor(object):
 	and opening pipes to the standard input and standard output so that messages can be sent and received.
 	Instead of using this class, it is highly recommended to use the abstracted SequenceExtractor class.
 	"""
-	def __init__(self, path_to_SequenceExtractor_jar, keep_function_call_types=False, keep_literals=False, keep_branches=True, output_tree=False, flatten_output=True):
+	def __init__(self, path_to_SequenceExtractor_jar, keep_function_call_types=False, keep_literals=False, keep_branches=True, output_tree=False, flatten_output=True, add_unique_ids=False):
 		"""
 		Initializes this inner extractor.
 		
@@ -17,11 +17,13 @@ class _SequenceExtractor(object):
 		:param keep_literals: boolean denoting whether literals (primitives) should be retained.
 		:param keep_branches: boolean denoting whether all branches should be kept.
 		:param output_tree: boolean denoting whether the output should be a tree or a sequence.
-		:param flatten_output: boolean denoting whether the output should be flattened-.
+		:param flatten_output: boolean denoting whether the output should be flattened.
+		:param add_unique_ids: boolean denoting whether statements should have IDs.
 		"""
-		self.cmd = ['java', '-cp', path_to_SequenceExtractor_jar, 'sequenceextractor.PythonBinder', 'true' if keep_function_call_types else 'false',
-					'true' if keep_literals else 'false', 'true' if keep_branches else 'false',
-					'true' if output_tree else 'false', 'true' if flatten_output else 'false']
+		self.cmd = ['java', '-cp', path_to_SequenceExtractor_jar, 'sequenceextractor.PythonBinder',
+					'true' if keep_function_call_types else 'false', 'true' if keep_literals else 'false',
+					'true' if keep_branches else 'false', 'true' if output_tree else 'false',
+					'true' if flatten_output else 'false', 'true' if add_unique_ids else 'false']
 		self.proc = subprocess.Popen(self.cmd, stdin=PIPE, stdout=PIPE, stderr=STDOUT)
 		self.nummessages = 0
 		line = self.send_message("START_OF_TRANSMISSION")
@@ -80,7 +82,7 @@ class SequenceExtractor(_SequenceExtractor):
 	"""
 	Class used as a python binding to the SequenceExtractor library. It contains functions for parsing java snippets to sequences.
 	"""
-	def __init__(self, path_to_SequenceExtractor_jar, keep_function_call_types=False, keep_literals=False, keep_branches=True, output_tree=False, flatten_output=True):
+	def __init__(self, path_to_SequenceExtractor_jar, keep_function_call_types=False, keep_literals=False, keep_branches=True, output_tree=False, flatten_output=True, add_unique_ids=False):
 		"""
 		Initializes this Sequence Extractor.
 		
@@ -89,9 +91,10 @@ class SequenceExtractor(_SequenceExtractor):
 		:param keep_literals: boolean denoting whether literals (primitives) should be retained.
 		:param keep_branches: boolean denoting whether all branches should be kept.
 		:param output_tree: boolean denoting whether the output should be a tree or a sequence.
-		:param flatten_output: boolean denoting whether the output should be flattened-.
+		:param flatten_output: boolean denoting whether the output should be flattened.
+		:param add_unique_ids: boolean denoting whether statements should have IDs.
 		"""
-		super(SequenceExtractor, self).__init__(path_to_SequenceExtractor_jar, keep_function_call_types, keep_literals, keep_branches, output_tree, flatten_output)
+		super(SequenceExtractor, self).__init__(path_to_SequenceExtractor_jar, keep_function_call_types, keep_literals, keep_branches, output_tree, flatten_output, add_unique_ids)
 
 	def parse_snippet(self, snippet_contents):
 		"""
