@@ -100,7 +100,7 @@ public class Snippet {
 	 * @param type the type of the block (METHOD, LOOP, CONDITION, CASE, TRY).
 	 */
 	public void endBlock(String type) {
-		addStatement(new Statement("START", type));
+		addStatement(new Statement("END", type));
 	}
 
 	/**
