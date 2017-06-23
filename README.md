@@ -42,7 +42,7 @@ SequenceExtractor also has python bindings. Using the python wrapper is simple. 
 has to be imported and the SequenceExtractor object has to be initialized given the path to the jar
 of the library and the options to keep function call types (<code>keep_function_call_types</code>)
 and keep literals (<code>keep_literals</code>):
-<pre><code>sequence_extractor = SequenceExtractor("path/to/SequenceExtractor-0.2.jar", False, False, True, False, True)</code></pre>
+<pre><code>sequence_extractor = SequenceExtractor("path/to/SequenceExtractor-0.3.jar", False, False, True, False, True)</code></pre>
 After that, you can parse snippets as follows:
 <pre><code>sequence = sequence_extractor.parse_snippet(
 			"JFrame frame = new JFrame(\"myframe\");\n" +

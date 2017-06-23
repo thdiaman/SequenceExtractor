@@ -2,7 +2,7 @@ from sequenceextractor import SequenceExtractor
 
 if __name__ == '__main__':
 	'''Used as a test for the python bindings'''
-	sequence_extractor = SequenceExtractor("../target/SequenceExtractor-0.2.jar")
+	sequence_extractor = SequenceExtractor("../target/SequenceExtractor-0.3.jar")
 	sequence = sequence_extractor.parse_snippet(
 			"JFrame frame = new JFrame(\"myframe\");\n" +
 			"JPanel panel = new JPanel();\n" +
