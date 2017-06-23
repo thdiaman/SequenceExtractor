@@ -464,6 +464,7 @@ public class SequenceExtractor {
 	 * @param keepBranches {@code true} if all branches should be kept, or {@code false} for the first branch.
 	 * @param outputTree {@code true} if the output should be a tree, or {@code false} for output as a sequence.
 	 * @param flattenOutput {@code true} if the output should be flattened, or {@code false} otherwise.
+	 * @param addUniqueIDs {@code true} if the statements should have IDs, or {@code false} otherwise.
 	 * @return the snippet as a list of statements.
 	 */
 	public static String extractSequence(String snippet, boolean keepFunctionCallTypes, boolean keepLiterals,
