@@ -23,14 +23,17 @@ public class ASTPreprocessor {
 	 */
 	public static void preprocessBranches(XMLDocument ast) {
 		for (XMLNode method : ast.getElementsByTagName("MethodDeclaration")) {
-			addBlockToBranches(method.getChildNodeByName("Block"));
+			if (method.getChildNodeByName("Block") != null)
+				addBlockToBranches(method.getChildNodeByName("Block"));
 		}
 		for (XMLNode method : ast.getElementsByTagName("MethodDeclaration")) {
-			for (XMLNode ifstatement : method.getChildNodeByName("Block")
-					.getChildNodesRecursivelyByName(StatementTypes.branchStatementTypes)) {
-				detectIfElseBranches(ifstatement);
-				detectSwitchCaseBranches(ifstatement);
-				putConditionsInBlocks(ifstatement);
+			if (method.getChildNodeByName("Block") != null) {
+				for (XMLNode ifstatement : method.getChildNodeByName("Block")
+						.getDeepChildNodesRecursivelyByName(StatementTypes.branchStatementTypes)) {
+					detectIfElseBranches(ifstatement);
+					detectSwitchCaseBranches(ifstatement);
+					putConditionsInBlocks(ifstatement);
+				}
 			}
 		}
 	}
