@@ -161,8 +161,8 @@ public class SequenceExtractor {
 						lookUpTable.addMethodVariable(variableName, variableType);
 					}
 					if (vardecl.hasMoreThanOneChildren()) {
-						for (XMLNode classinstantiation : statement.getChildNodesRecursivelyByName("ClassInstanceCreation")) {
-							XMLNodeList innerinstantiations = classinstantiation.getDeepChildNodesRecursivelyByName("ClassInstanceCreation");
+						for (XMLNode classinstantiation : statement.getChildNodesRecursivelyByName("ClassInstanceCreation", "MethodInvocation")) {
+							XMLNodeList innerinstantiations = classinstantiation.getDeepChildNodesRecursivelyByName("ClassInstanceCreation", "MethodInvocation");
 							Collections.reverse(innerinstantiations);
 							for (XMLNode innerclassinstantiation : innerinstantiations) {
 								snippet.addStatement(iterateLowLevelCode(innerclassinstantiation, lookUpTable));
@@ -172,6 +172,9 @@ public class SequenceExtractor {
 					}
 				} else if (statement.hasName(StatementTypes.branchStatementTypes)) {
 					ArrayList<XMLNode> branchstatements = statement.getChildNodesByName("Block");
+					if (statement.getChildNodes().size() > 0 && !statement.getChildNodes().get(0).hasName("Block")) {
+						snippet.addStatement(iterateLowLevelCode(statement.getChildNodes().get(0), lookUpTable));
+					}
 
 					// Check the type of the branch
 					if (statement.hasName(StatementTypes.loopStatementTypes) && branchstatements.size() > 0) {
@@ -253,8 +256,8 @@ public class SequenceExtractor {
 						snippet.levelOuter();
 					}
 				} else {
-					for (XMLNode classinstantiation : statement.getChildNodesRecursivelyByName("ClassInstanceCreation")) {
-						XMLNodeList innerinstantiations = classinstantiation.getDeepChildNodesRecursivelyByName("ClassInstanceCreation");
+					for (XMLNode classinstantiation : statement.getChildNodesRecursivelyByName("ClassInstanceCreation", "MethodInvocation")) {
+						XMLNodeList innerinstantiations = classinstantiation.getDeepChildNodesRecursivelyByName("ClassInstanceCreation", "MethodInvocation");
 						Collections.reverse(innerinstantiations);
 						for (XMLNode innerclassinstantiation : innerinstantiations) {
 							snippet.addStatement(iterateLowLevelCode(innerclassinstantiation, lookUpTable));
