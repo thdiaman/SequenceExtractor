@@ -40,9 +40,11 @@ Using in Python
 ---------------
 SequenceExtractor also has python bindings. Using the python wrapper is simple. At first, the library
 has to be imported and the SequenceExtractor object has to be initialized given the path to the jar
-of the library and the options to keep function call types (<code>keep_function_call_types</code>)
-and keep literals (<code>keep_literals</code>):
-<pre><code>sequence_extractor = SequenceExtractor("path/to/SequenceExtractor-0.3.jar", False, False, True, False, True)</code></pre>
+of the library and the options to keep function call types (<code>keep_function_call_types</code>),
+keep literals (<code>keep_literals</code>), keep branches (<code>keep_branches</code>), output as
+a tree or sequence (<code>output_tree</code>), whether the output should be flattened (<code>flatten_output</code>), 
+and whether unique IDs should be added (<code>add_unique_ids</code>):
+<pre><code>sequence_extractor = SequenceExtractor("path/to/SequenceExtractor-0.4.jar", False, False, True, False, True)</code></pre>
 After that, you can parse snippets as follows:
 <pre><code>sequence = sequence_extractor.parse_snippet(
 			"JFrame frame = new JFrame(\"myframe\");\n" +
