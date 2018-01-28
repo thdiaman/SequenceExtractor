@@ -2,6 +2,7 @@ package sequenceextractor;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
 
 import astextractor.ASTExtractor;
@@ -159,8 +160,16 @@ public class SequenceExtractor {
 						String variableName = variableNode.getTextContent();
 						lookUpTable.addMethodVariable(variableName, variableType);
 					}
-					if (vardecl.hasMoreThanOneChildren())
+					if (vardecl.hasMoreThanOneChildren()) {
+						for (XMLNode classinstantiation : statement.getChildNodesRecursivelyByName("ClassInstanceCreation")) {
+							XMLNodeList innerinstantiations = classinstantiation.getDeepChildNodesRecursivelyByName("ClassInstanceCreation");
+							Collections.reverse(innerinstantiations);
+							for (XMLNode innerclassinstantiation : innerinstantiations) {
+								snippet.addStatement(iterateLowLevelCode(innerclassinstantiation, lookUpTable));
+							}
+						}
 						snippet.addStatement(iterateLowLevelCode(vardecl, lookUpTable));
+					}
 				} else if (statement.hasName(StatementTypes.branchStatementTypes)) {
 					ArrayList<XMLNode> branchstatements = statement.getChildNodesByName("Block");
 
@@ -244,6 +253,13 @@ public class SequenceExtractor {
 						snippet.levelOuter();
 					}
 				} else {
+					for (XMLNode classinstantiation : statement.getChildNodesRecursivelyByName("ClassInstanceCreation")) {
+						XMLNodeList innerinstantiations = classinstantiation.getDeepChildNodesRecursivelyByName("ClassInstanceCreation");
+						Collections.reverse(innerinstantiations);
+						for (XMLNode innerclassinstantiation : innerinstantiations) {
+							snippet.addStatement(iterateLowLevelCode(innerclassinstantiation, lookUpTable));
+						}
+					}
 					snippet.addStatement(iterateLowLevelCode(statement, lookUpTable));
 				}
 			}
