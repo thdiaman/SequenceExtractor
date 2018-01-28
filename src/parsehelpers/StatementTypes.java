@@ -21,7 +21,7 @@ public class StatementTypes {
 	 * The simple statements, including expressions, variable declarations, etc.
 	 */
 	public final static StatementSet simpleStatementTypes = new StatementSet("VariableDeclarationStatement",
-			"ExpressionStatement", "ReturnStatement", "ThrowStatement");
+			"ExpressionStatement", "ReturnStatement", "ThrowStatement", "InfixExpression");
 
 	/**
 	 * The condition statement types, including if, switch and try statements.
